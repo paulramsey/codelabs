@@ -110,15 +110,29 @@ class FrontendRunner:
 def run_query_sync(request_text, cluster_name, location, instance_name, database_name, project_id, session_id, summary):
     local_runner = FrontendRunner()
     
-    instruction = f"""
-    Answer user questions to the best of your knowledge using provided tools.
-    Do not try to generate non-existent data but use the grounded data from the database.
-    When you answer questions about Cymbal Logistic activity
-    use the toolset to run query in the AlloyDB cluster {cluster_name} instance {instance_name} in the location {location}
-    in the project {project_id} in the database {database_name}
-    Use ai schema to use AI functions and models like gemini-3-flash-preview with the functions from the schema.
-    """
-    
+    # Check if agent has tools
+    has_tools = False
+    try:
+        if getattr(root_agent, 'tools', None):
+            has_tools = True
+    except:
+        pass
+
+    if not has_tools:
+        instruction = """
+        Answer the user's question to the best of your knowledge.
+        Inform the user that you do not currently have access to the database or tools required to answer specific questions about Cymbal Logistics activity.
+        """
+    else:
+        instruction = f"""
+        Answer user questions to the best of your knowledge using provided tools.
+        Do not try to generate non-existent data but use the grounded data from the database.
+        When you answer questions about Cymbal Logistic activity
+        use the toolset to run query in the AlloyDB cluster {cluster_name} instance {instance_name} in the location {location}
+        in the project {project_id} in the database {database_name}
+        Use ai schema to use AI functions and models like gemini-3-flash-preview with the functions from the schema.
+        """
+        
     if summary:
         instruction = f"Here is a summary of the previous conversation context to help you answer subsequent questions:\n{summary}\n\n" + instruction
         
