@@ -62,10 +62,15 @@ class State:
     session_id: str = ""
     conversation_history: list[str] = field(default_factory=list)
     context_summary: str = ""
+    show_sidebar: bool = True
 
 def select_tab(e: me.ClickEvent):
     state = me.state(State)
     state.active_query_tab = int(e.key)
+    
+def toggle_sidebar(e: me.ClickEvent):
+    state = me.state(State)
+    state.show_sidebar = not state.show_sidebar
     
 def on_cluster_name_change(e: me.InputBlurEvent):
     state = me.state(State)
@@ -478,46 +483,65 @@ def app():
         color="#111111"
     )):
         # Left Sidebar (Configurations)
-        with me.box(style=me.Style(
-            width="320px",
-            background="rgba(255, 255, 255, 0.4)",
-            backdrop_filter="blur(20px)",
-            padding=me.Padding.all(24),
-            border=me.Border(right=me.BorderSide(width=1, style="solid", color="rgba(255, 255, 255, 0.3)")),
-            display="flex",
-            flex_direction="column",
-            gap=16
-        )):
-            me.text("Database Config", type="headline-6", style=me.Style(margin=me.Margin(bottom=16), color="#000000", font_weight="600"))
-            
-            me.input(
-                label="Cluster Name",
-                value=state.cluster_name,
-                on_blur=on_cluster_name_change,
-                appearance="outline",
-                style=me.Style(width="100%", border_radius=4)
-            )
-            me.input(
-                label="Location",
-                value=state.location,
-                on_blur=on_location_change,
-                appearance="outline",
-                style=me.Style(width="100%", border_radius=4)
-            )
-            me.input(
-                label="Instance Name",
-                value=state.instance_name,
-                on_blur=on_instance_name_change,
-                appearance="outline",
-                style=me.Style(width="100%", border_radius=4)
-            )
-            me.input(
-                label="Database Name",
-                value=state.database_name,
-                on_blur=on_database_name_change,
-                appearance="outline",
-                style=me.Style(width="100%", border_radius=4)
-            )
+        if state.show_sidebar:
+            with me.box(style=me.Style(
+                width="320px",
+                background="rgba(255, 255, 255, 0.4)",
+                backdrop_filter="blur(20px)",
+                padding=me.Padding.all(24),
+                border=me.Border(right=me.BorderSide(width=1, style="solid", color="rgba(255, 255, 255, 0.3)")),
+                display="flex",
+                flex_direction="column",
+                gap=16
+            )):
+                # Hamburger Menu Button (Inside Sidebar)
+                with me.box(
+                    key="hamburger_sidebar",
+                    on_click=toggle_sidebar,
+                    style=me.Style(
+                        cursor="pointer",
+                        display="flex",
+                        align_items="center",
+                        justify_content="center",
+                        width="40px",
+                        height="40px",
+                        border_radius="50%",
+                        background="rgba(0, 0, 0, 0.05)",
+                        margin=me.Margin(bottom=8)
+                    )
+                ):
+                    me.text("☰", style=me.Style(font_size="24px", color="#000000", font_weight="bold"))
+                    
+                me.text("Database Config", type="headline-6", style=me.Style(margin=me.Margin(bottom=16), color="#000000", font_weight="600"))
+                
+                me.input(
+                    label="Cluster Name",
+                    value=state.cluster_name,
+                    on_blur=on_cluster_name_change,
+                    appearance="outline",
+                    style=me.Style(width="100%", border_radius=4)
+                )
+                me.input(
+                    label="Location",
+                    value=state.location,
+                    on_blur=on_location_change,
+                    appearance="outline",
+                    style=me.Style(width="100%", border_radius=4)
+                )
+                me.input(
+                    label="Instance Name",
+                    value=state.instance_name,
+                    on_blur=on_instance_name_change,
+                    appearance="outline",
+                    style=me.Style(width="100%", border_radius=4)
+                )
+                me.input(
+                    label="Database Name",
+                    value=state.database_name,
+                    on_blur=on_database_name_change,
+                    appearance="outline",
+                    style=me.Style(width="100%", border_radius=4)
+                )
         
         # Right Main Content
         with me.box(style=me.Style(
@@ -540,6 +564,23 @@ def app():
                 border=me.Border.all(me.BorderSide(width=1, style="solid", color="rgba(255, 255, 255, 0.5)")),
                 box_shadow="0 8px 32px rgba(0, 0, 0, 0.04)"
             )):
+                if not state.show_sidebar:
+                    with me.box(
+                        key="hamburger_header",
+                        on_click=toggle_sidebar,
+                        style=me.Style(
+                            cursor="pointer",
+                            margin=me.Margin(right=16),
+                            display="flex",
+                            align_items="center",
+                            justify_content="center",
+                            width="40px",
+                            height="40px",
+                            border_radius="50%",
+                            background="rgba(0, 0, 0, 0.05)"
+                        )
+                    ):
+                        me.text("☰", style=me.Style(font_size="24px", color="#000000", font_weight="bold"))
                 me.image(
                     src="/static/cymbal_logo_v2.png",
                     style=me.Style(
