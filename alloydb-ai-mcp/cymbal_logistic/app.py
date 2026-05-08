@@ -96,6 +96,17 @@ def on_debug_change(e: me.CheckboxChangeEvent):
     state = me.state(State)
     state.enable_debug = e.checked
 
+def clear_results(e: me.ClickEvent):
+    state = me.state(State)
+    state.response_text = ""
+    state.debug_info = ""
+    state.grid_headers = []
+    state.grid_rows = []
+    state.has_chart = False
+    state.query_history_json = "[]"
+    state.active_query_tab = 0
+    state.error_message = ""
+
 class FrontendRunner:
     def __init__(self):
         self.session_service = GLOBAL_SESSION_SERVICE
@@ -650,21 +661,38 @@ def app():
                         else:
                             me.box() # Empty box to keep space-between working
                             
-                        with me.box(
-                            classes="custom-btn",
-                            on_click=submit_query,
-                            style=me.Style(
-                                background="#000000",
-                                color="#FFFFFF",
-                                padding=me.Padding.symmetric(vertical=12, horizontal=32),
-                                border_radius=8,
-                                cursor="pointer",
-                                display="flex",
-                                align_items="center",
-                                justify_content="center"
-                            )
-                        ):
-                            me.text("Submit Request", style=me.Style(font_weight="500", font_size="14px"))
+                        with me.box(style=me.Style(display="flex", gap=12)):
+                            with me.box(
+                                classes="custom-btn",
+                                on_click=clear_results,
+                                style=me.Style(
+                                    background="rgba(0, 0, 0, 0.05)",
+                                    color="#000000",
+                                    padding=me.Padding.symmetric(vertical=12, horizontal=24),
+                                    border_radius=8,
+                                    cursor="pointer",
+                                    display="flex",
+                                    align_items="center",
+                                    justify_content="center"
+                                )
+                            ):
+                                me.text("Clear Output", style=me.Style(font_weight="500", font_size="14px"))
+
+                            with me.box(
+                                classes="custom-btn",
+                                on_click=submit_query,
+                                style=me.Style(
+                                    background="#000000",
+                                    color="#FFFFFF",
+                                    padding=me.Padding.symmetric(vertical=12, horizontal=32),
+                                    border_radius=8,
+                                    cursor="pointer",
+                                    display="flex",
+                                    align_items="center",
+                                    justify_content="center"
+                                )
+                            ):
+                                me.text("Submit Request", style=me.Style(font_weight="500", font_size="14px"))
                     
                     if state.error_message:
                         me.text(state.error_message, style=me.Style(color="#D93025", font_weight="500"))
